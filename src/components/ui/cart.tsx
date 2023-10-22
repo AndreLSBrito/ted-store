@@ -38,8 +38,8 @@ const Cart = () => {
         <ScrollArea className="h-full">
           {products.length > 0 ? (
             products.map(( product ) => (
-              <div className="flex flex-col gap-5">
-                <CartItem key={product.id} product={computedProductTotalPrice(product as any) as any}/>
+              <div key={product.id} className="flex flex-col gap-5">
+                <CartItem  product={computedProductTotalPrice(product as any) as any}/>
               </div>
             ))
           ) : (
