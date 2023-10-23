@@ -3,6 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import DiscountBadge from "@/components/ui/discount-badge";
+import { useToast } from "@/components/ui/use-toast";
 import { ProductWithTotalPrice } from "@/helpers/product";
 import { CartContext } from "@/providers/cart";
 import { Product } from "@prisma/client";
@@ -14,7 +15,10 @@ interface ProducInfoProps {
 }
 
 const ProductInfo = ({product}: ProducInfoProps) => {
+  const {toast} = useToast()
+
   const [quantity, setQuantity] = useState(1)
+
   const {addProductToCart} = useContext(CartContext)
 
   const handleDecreaseQuantityClick = () => {
@@ -27,6 +31,10 @@ const ProductInfo = ({product}: ProducInfoProps) => {
 
   const handleAddToCartClick = () => {
     addProductToCart({...product, quantity})
+    toast({
+      description: `Seu ${product.slug} foi adicionado ao carrinho!`,
+      className: "text-green-500"
+    })
   }
   
   return ( 
