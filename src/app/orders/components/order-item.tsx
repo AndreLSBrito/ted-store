@@ -3,6 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Order, Prisma } from "@prisma/client";
 import { format } from "date-fns"
 import OrderProductItem from "./order-product-item";
+import { Separator } from "@/components/ui/separator";
+import { useMemo } from "react";
+import { computedProductTotalPrice } from "@/helpers/product";
 
 interface OrderItemProps {
   order: Prisma.OrderGetPayload<{
@@ -15,13 +18,30 @@ interface OrderItemProps {
 }
 
 const OrderItem = ({ order }:OrderItemProps) => {
+  const subtotal = useMemo(() => {
+    return order.orderProducts.reduce((acc, orderProduct) => {
+      return acc + Number(orderProduct.basePrice) * orderProduct.quantity
+    }, 0)
+  }, [order.orderProducts])
+
+  const total = useMemo(() => {
+
+    return order.orderProducts.reduce((acc, orderProduct) => {
+      const productWithTotalPrice = computedProductTotalPrice(orderProduct.product)
+      return acc + productWithTotalPrice.totalPrice * orderProduct.quantity;
+    }, 0)
+  }, [order.orderProducts])
+
+  const totalDiscount = subtotal - total;
+
   return ( 
     <Card className="px-5">
       <Accordion type="single" className="w-full" collapsible>
         <AccordionItem value={order.id}>
           <AccordionTrigger>
-            <div className="flex fex-col gap-1 text-left">
-              Pedido com {order.orderProducts.length} produto(s)
+            <div className="flex flex-col gap-1 text-left">
+              <p>Pedido com {order.orderProducts.length} produto(s)</p>
+              <span className="text-sm opacity-60">Feito em {format(order.createdAt, "d/MM/y 'às' HH:mm")}</span>
             </div>
           </AccordionTrigger>
         
@@ -48,6 +68,36 @@ const OrderItem = ({ order }:OrderItemProps) => {
             {order.orderProducts.map(OrderProduct => (
               <OrderProductItem key={OrderProduct.id} orderProduct={OrderProduct}/>
             ))}
+
+            <div className="flex flex-col w-full gap-1 text-xs">
+              <Separator/>
+
+              <div className="flex justify-between w-full py-3">
+                <p>Subtotal</p>
+                <p>R$ {subtotal.toFixed(2)}</p>
+              </div>
+
+              <Separator/>
+
+              <div className="flex justify-between w-full py-3">
+                <p>Entrega</p>
+                <p>GRÁTIS</p>
+              </div>
+
+              <Separator/>
+
+              <div className="flex justify-between w-full py-3">
+                <p>Descontos</p>
+                <p>-R$ {totalDiscount}</p>
+              </div>
+
+              <Separator/>
+
+              <div className="flex justify-between w-full py-3 text-sm font-bold">
+                <p>Total</p>
+                <p>R$ {total.toFixed(2)}</p>
+              </div>
+            </div>
           </div>
         </AccordionContent>
         </AccordionItem>
