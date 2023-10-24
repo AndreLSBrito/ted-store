@@ -3,7 +3,7 @@
 import { CartProduct } from "@/providers/cart"
 import Stripe from "stripe"
 
-export const createCheckout = async (products: CartProduct[]) => {
+export const createCheckout = async (products: CartProduct[], orderId: string) => {
   // criar checkout
   
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "A variável de ambiente STRIPE_SECRET_KEY não está definida.", {
@@ -15,6 +15,9 @@ export const createCheckout = async (products: CartProduct[]) => {
     mode: "payment",
     success_url: process.env.HOST_URL,
     cancel_url: process.env.HOST_URL,
+    metadata: {
+      orderId,
+    },
     line_items: products.map( product => {
       return {
         price_data: {
